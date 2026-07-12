@@ -61,6 +61,44 @@ def get_expenses():
 
     return jsonify(result)
 
+@app.route("/expenses/<int:id>", methods=["GET"])
+def get_expense(id):
+    expense = Expense.query.get_or_404(id)
+
+    return jsonify({
+        "id": expense.id,
+        "title": expense.title,
+        "amount": expense.amount,
+        "category": expense.category
+    })
+
+@app.route("/expenses/<int:id>", methods=["PUT"])
+def update_expense(id):
+    expense = Expense.query.get_or_404(id)
+
+    data = request.get_json()
+
+    expense.title = data["title"]
+    expense.amount = data["amount"]
+    expense.category = data["category"]
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Expense updated successfully!"
+    })
+@app.route("/expenses/<int:id>", methods=["DELETE"])
+def delete_expense(id):
+    expense = Expense.query.get_or_404(id)
+
+    db.session.delete(expense)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Expense deleted successfully!"
+    })
+
+
 # Create the database
 with app.app_context():
     db.create_all()
