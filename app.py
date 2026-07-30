@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
@@ -5,7 +6,10 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 # Configure SQLite
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///expenses.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "os.getenv(
+    "DATABASE_URL",
+    "sqlite://expenses.db"
+    )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Initialize SQLAlchemy

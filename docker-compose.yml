@@ -1,0 +1,22 @@
+
+
+
+services:
+    web:
+      build: .
+      ports:
+       - "5000:5000"
+
+      depends_on:
+        - db 
+
+      enironment:
+        DATABASE_URL: postgresql://postgres:password@db:5432:expenses
+
+   db:
+      image: posgtgres:16
+      environemnt:
+        POSTGRES_DB:  expenses
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: password     
+      
