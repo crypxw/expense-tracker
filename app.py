@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 # Configure SQLite
-app.config["SQLALCHEMY_DATABASE_URI"] = "os.getenv(
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
     "DATABASE_URL",
     "sqlite://expenses.db"
     )
