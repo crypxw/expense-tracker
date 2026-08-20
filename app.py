@@ -46,7 +46,10 @@ def create_expense():
     db.session.commit()
 
     return jsonify({
-        "message": "Expense created successfully!"
+    "id": expense.id,
+    "title": expense.title,
+    "amount": expense.amount,
+    "category": expense.category
     }), 201
 #Get expense
 @app.route("/expenses", methods=["GET"])
