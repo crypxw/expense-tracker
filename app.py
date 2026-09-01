@@ -8,7 +8,7 @@ app = Flask(__name__)
 # Configure SQLite
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
     "DATABASE_URL",
-    "sqlite://expenses.db"
+    "sqlite:///expenses.db"
     )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
