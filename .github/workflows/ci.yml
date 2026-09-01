@@ -27,7 +27,13 @@ jobs:
 
     - name: Wait for services
       run: sleep 5
+  # ADDING THIS STEP HERE TO DEBUG THE CRASH:
+    - name: View Container Logs on Failure
+      if: always()
+      run: docker compose logs web
 
+    - name: Run Tests
+      run: docker compose exec -T web python -m pytest
     - name: Run Tests
       run: docker compose exec -T web python -m pytest
 
