@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: Continuous Integration & Deployment
 
 on:
   push:
@@ -7,10 +7,9 @@ on:
     branches: [ main, master ]
 
 jobs:
+  # STAGE 1: Run your test suite inside the container environment
   test:
     runs-on: ubuntu-latest
-
-    # We inject the environment variables here so Docker Compose can read them
     env:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
@@ -26,7 +25,6 @@ jobs:
     - name: Start Services
       run: docker compose up -d
 
-    # Give the database a brief moment to finish initializing before running tests
     - name: Wait for services
       run: sleep 5
 
@@ -36,4 +34,33 @@ jobs:
     - name: Shut down services
       if: always()
       run: docker compose down -v
+
+  # STAGE 2: Build and push the final production image to Docker Hub
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test # Only runs if the test job completes successfully
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+
+    # Log into Docker Hub securely using your saved repository secrets
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3.3.0
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Build the production image and push it to your public repository registry
+    - name: Build and Push Production Docker Image
+      uses: docker/build-push-action@v6.13.0
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        # Automatically tags it as 'latest' and with the unique Git commit SHA hash
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/expense-tracker:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/expense-tracker:${{ github.sha }}
 
