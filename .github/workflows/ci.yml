@@ -10,24 +10,29 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # We inject the environment variables here so Docker Compose can read them
+    env:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: expense_tracker_test
+
     steps:
-    # Step 1: Check out code
     - name: Checkout code
       uses: actions/checkout@v4.2.2
 
-    # Step 2: Directly build the images using native Docker Compose (low memory usage)
     - name: Build Docker Images
       run: docker compose build
 
-    # Step 3: Boot services cleanly in the background
     - name: Start Services
       run: docker compose up -d
 
-    # Step 4: Execute tests safely inside the container
+    # Give the database a brief moment to finish initializing before running tests
+    - name: Wait for services
+      run: sleep 5
+
     - name: Run Tests
       run: docker compose exec -T web python -m pytest
 
-    # Step 5: Clear active runner resources and volumes upon completion
     - name: Shut down services
       if: always()
       run: docker compose down -v
