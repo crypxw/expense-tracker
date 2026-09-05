@@ -34,9 +34,7 @@ jobs:
 
     - name: Run Tests
       run: docker compose exec -T web python -m pytest
-    - name: Run Tests
-      run: docker compose exec -T web python -m pytest
-
+ 
     - name: Shut down services
       if: always()
       run: docker compose down -v
