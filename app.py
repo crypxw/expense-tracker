@@ -30,6 +30,12 @@ def home():
     return {
         "message": "Expense Tracker API is running!"
     }
+# Health endpoint
+@app.route("/health")
+def health():
+    return {
+        "status": "healthy"
+    }
 
 # Expenses route
 @app.route("/expenses", methods=["POST"])
