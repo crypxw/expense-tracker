@@ -3,6 +3,7 @@ services:
     build: .
     expose:
       - "5000"
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
@@ -12,6 +13,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: expense_tracker_nginx
+    restart: unless-stopped
     ports:
       - "80:80"
     volumes:
@@ -21,6 +23,7 @@ services:
 
   db:
     image: postgres:16
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
