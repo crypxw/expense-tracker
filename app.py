@@ -42,21 +42,26 @@ def health():
 def create_expense():
     data = request.get_json()
 
+    required_fields = ["title", "amount", "category"]
+    missing = [f for f in required_fields if f not in data]
+    if missing:
+        return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
+
     expense = Expense(
         title=data["title"],
         amount=data["amount"],
         category=data["category"]
     )
-
     db.session.add(expense)
     db.session.commit()
 
     return jsonify({
-    "id": expense.id,
-    "title": expense.title,
-    "amount": expense.amount,
-    "category": expense.category
+        "id": expense.id,
+        "title": expense.title,
+        "amount": expense.amount,
+        "category": expense.category
     }), 201
+    
 #Get expense
 @app.route("/expenses", methods=["GET"])
 def get_expenses():
@@ -118,4 +123,4 @@ with app.app_context():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
