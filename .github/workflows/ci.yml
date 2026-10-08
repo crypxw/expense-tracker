@@ -21,6 +21,17 @@ jobs:
 
     - name: Build Docker Images
       run: docker compose build
+    - name: Build image for security scan
+      run: docker build -t expense-tracker-scan .
+
+    - name: Scan image with Trivy
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        image-ref: expense-tracker-scan
+        format: table
+        severity: HIGH,CRITICAL
+        ignore-unfixed: true
+        exit-code: 0
 
     - name: Start Services
       run: docker compose up -d
