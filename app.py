@@ -96,6 +96,11 @@ def update_expense(id):
 
     data = request.get_json()
 
+    required_fields = ["title", "amount", "category"]
+    missing = [f for f in required_fields if f not in data]
+    if missing:
+        return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
+
     expense.title = data["title"]
     expense.amount = data["amount"]
     expense.category = data["category"]
