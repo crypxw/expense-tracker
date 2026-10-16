@@ -12,3 +12,5 @@ typing_extensions==4.16.0
 Werkzeug==3.1.8
 pytest==9.1.1
 gunicorn==26.2.0
+prometheus_client==0.26.0
+prometheus_flask_exporter==0.23.2
