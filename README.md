@@ -4,17 +4,18 @@ A containerized REST API for tracking expenses, built with Flask and PostgreSQL 
 
 ## Architecture
 
-```text
-Client (curl / browser)
-          |
-          v
-   Nginx  :80   (only public entry point)
-          |
-          v
-   Gunicorn + Flask  :5000   (internal only)
-          |
-          v
-   PostgreSQL  :5432   (named Docker volume)
+```mermaid
+flowchart TD
+    client["Client (browser / curl)"] -->|"HTTP :80"| nginx
+
+    subgraph compose["Docker Compose stack"]
+        nginx["Nginx<br/>reverse proxy"] -->|":5000 (internal only)"| web["Gunicorn + Flask"]
+        web -->|":5432"| db[("PostgreSQL 16")]
+        db --- vol[("postgres_data<br/>named volume")]
+    end
+
+    backup["backup.sh<br/>pg_dump"] -.-> db
+    backup -.-> files["backups/*.sql"]
 ```
 
 All three services run in Docker Compose. Port 5000 is exposed only to the internal Docker network, so the app can be reached only through Nginx.
