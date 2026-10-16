@@ -1,9 +1,11 @@
 import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from prometheus_flask_exporter import PrometheusMetrics
 
 # Create the Flask application
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
 # Configure SQLite
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
