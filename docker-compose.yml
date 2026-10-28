@@ -29,7 +29,7 @@ services:
       - web
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v3.15.0
     container_name: expense_tracker_prometheus
     restart: unless-stopped
     ports:
@@ -41,7 +41,7 @@ services:
       - web 
     
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:13.2.4
     container_name: expense_tracker_grafana
     restart: unless-stopped
     ports:
