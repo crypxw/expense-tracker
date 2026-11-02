@@ -126,6 +126,28 @@ The dump contains `CREATE TABLE`, so it restores into a database where the `expe
 
 The process was verified end to end: 23 rows were counted, the `expense` table was dropped, the data was restored from the backup, and the count returned to 23, with the ID sequence restored too.
 
+## Monitoring
+
+The stack includes Prometheus and Grafana.
+
+- The Flask app exposes request counts and durations at `/metrics` (via `prometheus-flask-exporter`).
+- Prometheus scrapes `web:5000/metrics` every 15 seconds over the internal Docker network.
+- `/metrics` is blocked at Nginx (returns 404), so it is not reachable from outside the stack.
+- Grafana reads from Prometheus. The data source and the "Expense Tracker" dashboard are provisioned from files in `grafana/`, so they load automatically on startup.
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| Grafana | http://localhost:3000 | Login `admin`, password from `GRAFANA_ADMIN_PASSWORD` in `.env` |
+| Prometheus | http://localhost:9090 | Targets page shows the app as `UP` |
+
+Both ports are published on `127.0.0.1` only. Add `GRAFANA_ADMIN_PASSWORD` to your `.env` (see `.env.example`).
+
+The dashboard shows whether the app is up, requests per second by route, average response time, and the error rate.
+
+![Grafana dashboard](docs/grafana-dashboard.png)
+
+Image versions are pinned (`prom/prometheus:v3.15.0`, `grafana/grafana:13.2.4`).
+
 ## Security Notes
 
 - Secrets live in `.env` (gitignored) and GitHub Secrets, never in the repository
