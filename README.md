@@ -1,6 +1,6 @@
 # Expense Tracker API
 
-A containerized REST API for tracking expenses, built with Flask and PostgreSQL and served through Gunicorn and Nginx. It includes automated tests, a CI/CD pipeline that publishes to Docker Hub, and a tested database backup and restore process.
+A containerized REST API for tracking expenses, built with Flask and PostgreSQL and served through Gunicorn and Nginx. It includes automated tests, a CI/CD pipeline with Trivy image scanning that publishes to Docker Hub, Prometheus and Grafana monitoring, and a tested database backup and restore process.
 
 ## Architecture
 
@@ -12,6 +12,8 @@ flowchart TD
         nginx["Nginx<br/>reverse proxy"] -->|":5000 (internal only)"| web["Gunicorn + Flask"]
         web -->|":5432"| db[("PostgreSQL 16")]
         db --- vol[("postgres_data<br/>named volume")]
+                prom["Prometheus"] -->|"scrapes /metrics"| web
+        graf["Grafana"] -->|"queries"| prom
     end
 
     backup["backup.sh<br/>pg_dump"] -.-> db
@@ -29,6 +31,8 @@ All three services run in Docker Compose. Port 5000 is exposed only to the inter
 - Docker and Docker Compose
 - pytest
 - GitHub Actions and Docker Hub
+- Trivy (image vulnerability scanning)
+- Prometheus and Grafana (monitoring)
 
 ## API Endpoints
 
@@ -59,6 +63,7 @@ cd expense-tracker
 POSTGRES_DB=expenses
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=<choose-a-password>
+GRAFANA_ADMIN_PASSWORD=<choose-a-password>
 ```
 
 The file must use Unix (LF) line endings. Windows (CRLF) endings add a hidden `\r` to each value and break the scripts.
@@ -100,9 +105,10 @@ docker compose exec -T web python -m pytest
 The GitHub Actions workflow (`.github/workflows/ci.yml`):
 
 1. Builds the Docker images
-2. Starts the stack with Docker Compose
-3. Runs pytest inside the `web` container
-4. On push to `main`, logs into Docker Hub using GitHub Secrets and pushes the production image
+2. Scans the image with Trivy and fails the build on fixable HIGH or CRITICAL vulnerabilities
+3. Starts the stack with Docker Compose
+4. Runs pytest inside the `web` container
+5. On push to `main`, logs into Docker Hub using GitHub Secrets and pushes the production image
 
 ## Backup & Restore
 
@@ -153,3 +159,5 @@ Image versions are pinned (`prom/prometheus:v3.15.0`, `grafana/grafana:13.2.4`).
 - Secrets live in `.env` (gitignored) and GitHub Secrets, never in the repository
 - The application port is not published to the host
 - Backups and the SQLite fallback folder (`instance/`) are gitignored
+- The application container runs as a non-root user
+- Prometheus and Grafana are published on `127.0.0.1` only, and `/metrics` is blocked at Nginx
